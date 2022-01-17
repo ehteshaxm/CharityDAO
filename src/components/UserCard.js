@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Heading, Image, Badge, Flex, Button } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 
 const OrgCard = ({ img }) => {
   return (
@@ -31,10 +32,12 @@ const OrgCard = ({ img }) => {
           recusandae.
         </Box>
         <Flex align='center' justifyContent='space-between' mt={4}>
-          <Button colorScheme='cyan' variant='outline'>
-            View Organisation
-          </Button>
-          <Badge borderRadius='full' px='2' colorScheme='red'>
+          <Link to='/org'>
+            <Button colorScheme='cyan' variant='outline'>
+              View Organisation
+            </Button>
+          </Link>
+          <Badge borderRadius='full' px='2' colorScheme='pink'>
             Not Approved
           </Badge>
         </Flex>

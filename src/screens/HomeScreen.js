@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import { Box, Heading, Flex, Button, Kbd, Container } from '@chakra-ui/react';
-import OrgCard from '../components/OrgCard';
+import OrgCard from '../components/UserCard';
 
 const HomeScreen = () => {
   return (
