@@ -12,7 +12,7 @@ const Header = (props) => {
             <Link to='/'>
               <Heading as='h1' size='xl' letterSpacing={'tighter'}>
                 Charity
-                <Box as='span' color='purple.500'>
+                <Box as='span' color='teal.500'>
                   DAO
                 </Box>
               </Heading>
@@ -22,11 +22,11 @@ const Header = (props) => {
           <Flex align='center'>
             <Box mr={6}>
               <Heading as='h5' size='md'>
-                Token Value: 0.002 <Kbd>ether</Kbd>
+                Pool Amount: 0.002 <Kbd>ether</Kbd>
               </Heading>
             </Box>
             <Box mr={2}>
-              <Button colorScheme='purple' variant='solid'>
+              <Button colorScheme='teal' variant='solid'>
                 <AddIcon />
               </Button>
             </Box>

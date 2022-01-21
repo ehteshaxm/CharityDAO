@@ -1,19 +1,17 @@
-import React from 'react';
-import { Box, Heading, Image, Badge, Flex, Button } from '@chakra-ui/react';
+import React, { useState, useEffect } from 'react';
+import { Box, Heading, Badge, Flex, Button } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 
-const OrgCard = ({ img }) => {
+const UserCard = ({ name, description, approved, rejected, routeTo }) => {
   return (
     <Box
       width='350px'
-      height='430px'
+      height='230px'
       borderWidth='1px'
       borderRadius='lg'
       overflow='hidden'
       m={5}
     >
-      <Image src={img} alt='person' width='100%' height='200px' />
-
       <Box p='6'>
         <Heading
           mt='1'
@@ -23,22 +21,26 @@ const OrgCard = ({ img }) => {
           lineHeight='tight'
           isTruncated
         >
-          Orphan Foundation
+          {name}
         </Heading>
 
-        <Box>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eveniet
-          nihil tempore nam placeat veniam dolorem a tenetur cum quod
-          recusandae.
-        </Box>
+        <Box>{description}</Box>
         <Flex align='center' justifyContent='space-between' mt={4}>
           <Link to='/org'>
             <Button colorScheme='cyan' variant='outline'>
-              View Organisation
+              View User
             </Button>
           </Link>
-          <Badge borderRadius='full' px='2' colorScheme='pink'>
-            Not Approved
+          <Badge
+            borderRadius='full'
+            px='2'
+            colorScheme={
+              !approved && !rejected ? 'pink' : approved ? 'green' : 'red'
+            }
+          >
+            {!approved && !rejected && 'Not Approved'}
+            {approved && 'Approved'}
+            {rejected && 'Rejected'}
           </Badge>
         </Flex>
       </Box>
@@ -46,4 +48,4 @@ const OrgCard = ({ img }) => {
   );
 };
 
-export default OrgCard;
+export default UserCard;

@@ -7,22 +7,46 @@ import {
   GridItem,
   Button,
   Badge,
+  Flex,
 } from '@chakra-ui/react';
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
+import web3 from '../eth/web3';
 
-const Campaign = () => {
+const Campaign = ({
+  title,
+  description,
+  name,
+  phone,
+  email,
+  recipient,
+  amount,
+  totalMembers,
+  approved,
+  rejected,
+  approveCount,
+  rejectCount,
+  transactionComplete,
+  metamaskUserIsMember,
+  metamaskUserIsUser,
+}) => {
   return (
     <Box borderWidth='1px' borderRadius='lg' p={4} width='400px'>
       <Heading size='md'>
-        School Books{' '}
-        <Badge borderRadius='full' px='2' colorScheme='green'>
-          Approved
+        {title}{' '}
+        <Badge
+          borderRadius='full'
+          px='2'
+          colorScheme={
+            !approved && !rejected ? 'pink' : approved ? 'green' : 'red'
+          }
+        >
+          {!approved && !rejected && 'Not Approved'}
+          {approved && 'Approved'}
+          {rejected && 'Rejected'}
         </Badge>
       </Heading>
       <Text mt={2} mb={4}>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic error
-        impedit eligendi? Possimus eaque eius eveniet voluptatum voluptates
-        reprehenderit cumque.
+        {description}
       </Text>
       <Grid templateColumns='repeat(4, 1fr)' gap={6}>
         <GridItem colSpan={2}>
@@ -30,7 +54,7 @@ const Campaign = () => {
             <Heading as='h5' size='sm' fontWeight='semibold'>
               Recipient Name:
             </Heading>
-            Sheila
+            {name}
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
@@ -38,7 +62,8 @@ const Campaign = () => {
             <Heading as='h5' size='sm' fontWeight='semibold'>
               Recipient Contact:
             </Heading>
-            +91 9372173070
+            {phone}
+            <Text>{email}</Text>
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
@@ -46,7 +71,7 @@ const Campaign = () => {
             <Heading as='h5' size='sm' fontWeight='semibold'>
               Recipient:
             </Heading>
-            0xd67E8127e5339fC482195c61d61Ccfb9D2a1166e
+            {recipient}
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
@@ -54,7 +79,7 @@ const Campaign = () => {
             <Heading as='h5' size='sm' fontWeight='semibold'>
               Amount:
             </Heading>
-            0.002 Ether/Approver
+            {web3.utils.fromWei(amount, 'ether')}
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
@@ -63,18 +88,18 @@ const Campaign = () => {
               Status:
             </Heading>
             <Badge borderRadius='full' px='2' colorScheme='green' mr={1}>
-              3 Approved
+              {approveCount} Approved
             </Badge>
             <Badge borderRadius='full' px='2' colorScheme='red' mr={1}>
-              3 Rejected
+              {rejectCount} Rejected
             </Badge>
             <Badge borderRadius='full' px='2' colorScheme='gray'>
-              7 Remaining
+              {totalMembers} Remaining
             </Badge>
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
-          <Box>
+          <Flex flexDirection='column'>
             <Button
               leftIcon={<CheckIcon />}
               colorScheme='green'
@@ -91,7 +116,10 @@ const Campaign = () => {
             >
               Reject
             </Button>
-          </Box>
+            <Button colorScheme='red' variant='solid' px={6} mt={2}>
+              Transact
+            </Button>
+          </Flex>
         </GridItem>
       </Grid>
     </Box>
