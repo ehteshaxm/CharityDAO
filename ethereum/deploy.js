@@ -1,6 +1,6 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
-const dao = require('./build/DAO.json');
+const dao = require('../src/eth/build/DAO.json');
 
 const provider = new HDWalletProvider({
   mnemonic: {

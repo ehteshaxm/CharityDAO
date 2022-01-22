@@ -6,7 +6,6 @@ const UserCard = ({ name, description, approved, rejected, routeTo }) => {
   return (
     <Box
       width='350px'
-      height='230px'
       borderWidth='1px'
       borderRadius='lg'
       overflow='hidden'
@@ -26,7 +25,7 @@ const UserCard = ({ name, description, approved, rejected, routeTo }) => {
 
         <Box>{description}</Box>
         <Flex align='center' justifyContent='space-between' mt={4}>
-          <Link to='/org'>
+          <Link to={`/user/${routeTo}`}>
             <Button colorScheme='cyan' variant='outline'>
               View User
             </Button>
@@ -35,10 +34,10 @@ const UserCard = ({ name, description, approved, rejected, routeTo }) => {
             borderRadius='full'
             px='2'
             colorScheme={
-              !approved && !rejected ? 'pink' : approved ? 'green' : 'red'
+              !approved && !rejected ? 'blue' : approved ? 'green' : 'red'
             }
           >
-            {!approved && !rejected && 'Not Approved'}
+            {!approved && !rejected && 'Voting'}
             {approved && 'Approved'}
             {rejected && 'Rejected'}
           </Badge>

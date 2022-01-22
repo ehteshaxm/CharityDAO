@@ -11,6 +11,7 @@ contract DAO {
 
     User[] public allUsers;
     mapping(address => bool) public users;
+    mapping(address => User) public metamaskAssociatedUser;
 
     constructor(uint buyin) {
         memberBuyin = buyin;
@@ -30,6 +31,7 @@ contract DAO {
         User newUser = new User(name, description, locationAddress, phone, email, msg.sender, DAOAddress);
         users[msg.sender] = true;
         allUsers.push(newUser);
+        metamaskAssociatedUser[msg.sender] = newUser;
     }
 
     function getAllUsers() public view returns(User[] memory){
@@ -202,26 +204,6 @@ contract User {
         if(campaigns[campaignIndex].rejectCount > (instance.getMemberCount()/2)) {
             campaigns[campaignIndex].isRejected = true;
         }
-    }
-
-    function getMemberApprovalStatus(uint campaignIndex) public view returns(bool){
-        DAO instance = DAO(DAOAddress);
-        require(instance.isAMember(msg.sender));
-        require(!instance.isAUser(msg.sender));
-        if(campaigns[campaignIndex].campaignApprovedMembers[msg.sender]){
-            return true;
-        }
-        return false;
-    }
-
-    function getMemberRejectionStatus(uint campaignIndex) public view returns(bool){
-        DAO instance = DAO(DAOAddress);
-        require(instance.isAMember(msg.sender));
-        require(!instance.isAUser(msg.sender));
-        if(campaigns[campaignIndex].campaignRejectedMembers[msg.sender]){
-            return true;
-        }
-        return false;
     }
 
     function finalizeTransaction(uint campaignIndex) public {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Heading,
@@ -13,7 +13,6 @@ import {
 } from '@chakra-ui/react';
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import web3 from '../eth/web3';
-import user from '../eth/user';
 
 const Campaign = ({
   index,
@@ -40,8 +39,6 @@ const Campaign = ({
 }) => {
   const [approveButtonLoading, setApproveButtonLoading] = useState(false);
   const [rejectButtonLoading, setRejectButtonLoading] = useState(false);
-
-  useEffect(() => {}, []);
 
   return (
     <Box

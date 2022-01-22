@@ -22,8 +22,9 @@ import { Link } from 'react-router-dom';
 import dao from '../eth/dao';
 import user from '../eth/user';
 import web3 from '../eth/web3';
+import Header from '../components/Header';
 
-const OrgScreen = ({ history }) => {
+const OrgScreen = ({ history, match }) => {
   const [userDetails, setUserDetails] = useState({});
   const [metamaskUser, setMetamaskUser] = useState({});
   const [allCampaigns, setAllCampaigns] = useState([]);
@@ -32,7 +33,8 @@ const OrgScreen = ({ history }) => {
     useState(false);
   const [userRejectButtonLoading, setUserRejectButtonLoading] = useState(false);
 
-  const routeUser = '0x6200f5Ac82a2CcBA369925F11De05AE26B1E8684';
+  const routeUser = match.params.id;
+  // const routeUser = '0x6200f5Ac82a2CcBA369925F11De05AE26B1E8684';
   // const routeUser = '0x57D5B1Ff46C5B3E21854459DCcb55A57E2A229A9';
 
   useEffect(() => {
@@ -197,6 +199,7 @@ const OrgScreen = ({ history }) => {
 
   return (
     <div>
+      <Header />
       {loading && (
         <Center height='500px'>
           <Spinner
@@ -219,15 +222,13 @@ const OrgScreen = ({ history }) => {
                   px='2'
                   colorScheme={
                     !userDetails.approved && !userDetails.rejected
-                      ? 'pink'
+                      ? 'blue'
                       : userDetails.approved
                       ? 'green'
                       : 'red'
                   }
                 >
-                  {!userDetails.approved &&
-                    !userDetails.rejected &&
-                    'Not Approved'}
+                  {!userDetails.approved && !userDetails.rejected && 'Voting'}
                   {userDetails.approved && 'Approved'}
                   {userDetails.rejected && 'Rejected'}
                 </Badge>
@@ -361,7 +362,12 @@ const OrgScreen = ({ history }) => {
                 Campaigns
               </Heading>
               {!metamaskUser.isMember && (
-                <Link to='/create'>
+                <Link
+                  to={{
+                    pathname: '/create',
+                    state: { previousUser: routeUser },
+                  }}
+                >
                   <Button
                     leftIcon={<AddIcon />}
                     colorScheme='teal'
@@ -371,7 +377,6 @@ const OrgScreen = ({ history }) => {
                       userDetails.userAddress != metamaskUser.address
                     }
                     history={history}
-                    userContractAddress={routeUser}
                   >
                     Create Campaign
                   </Button>

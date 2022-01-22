@@ -2,7 +2,8 @@ const path = require('path');
 const solc = require('solc');
 const fs = require('fs-extra');
 
-const buildPath = path.resolve(__dirname, 'build');
+const dirPath = path.join(__dirname, '../src/eth');
+const buildPath = path.resolve(dirPath, 'build');
 fs.removeSync(buildPath);
 
 const daoPath = path.resolve(__dirname, 'contracts', 'CharityDAO.sol');

@@ -3,7 +3,7 @@ import Dao from './build/DAO.json';
 
 const instance = new web3.eth.Contract(
   Dao.abi,
-  '0x3997D8602B34899c0F59f64C3be54555F1Ad3C22'
+  '0x8dA1F23a168267A034417FF8A855CCb07c2BeD90'
 );
 
 export default instance;

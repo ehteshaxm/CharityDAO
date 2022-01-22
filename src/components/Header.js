@@ -22,7 +22,6 @@ import {
 } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
-import user from '../eth/user';
 import dao from '../eth/dao';
 import web3 from '../eth/web3';
 
@@ -31,7 +30,7 @@ const Header = (props) => {
   const [metamaskUser, setMetamaskUser] = useState({});
   const [poolAmount, setPoolAmount] = useState('');
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [headerLoading, setHeaderLoading] = useState(false);
+  const [routeTo, setRouteTo] = useState('');
 
   useEffect(() => {
     fetchMetamaskUserDetails();
@@ -39,11 +38,16 @@ const Header = (props) => {
   }, []);
 
   async function fetchMetamaskUserDetails() {
-    setHeaderLoading(true);
     try {
       const accounts = await web3.eth.getAccounts();
       const isUser = await dao.methods.isAUser(accounts[0]).call();
       const isMember = await dao.methods.isAMember(accounts[0]).call();
+      if (isUser) {
+        const userProfileAddress = await dao.methods
+          .metamaskAssociatedUser(accounts[0])
+          .call();
+        setRouteTo(userProfileAddress);
+      }
       setMetamaskUser({
         isUser,
         isMember,
@@ -51,7 +55,6 @@ const Header = (props) => {
     } catch (error) {
       console.log(error);
     }
-    setHeaderLoading(false);
   }
 
   async function fetchPoolAmount() {
@@ -83,7 +86,7 @@ const Header = (props) => {
       <Container maxW='container.xl'>
         <Flex as='nav' align='center' justify='space-between' wrap='wrap'>
           <Flex align='center' mr={5}>
-            <Link to='/'>
+            <Link to='/home'>
               <Heading as='h1' size='xl' letterSpacing={'tighter'}>
                 Charity
                 <Box as='span' color='teal.500'>
@@ -93,7 +96,11 @@ const Header = (props) => {
             </Link>
           </Flex>
 
-          {metamaskUser.isUser && <Button colorScheme='teal'>Profile</Button>}
+          {metamaskUser.isUser && (
+            <Link to={`/user/${routeTo}`}>
+              <Button colorScheme='teal'>Profile</Button>
+            </Link>
+          )}
 
           {metamaskUser.isMember && (
             <Flex align='center'>
