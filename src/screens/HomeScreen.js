@@ -87,7 +87,7 @@ const HomeScreen = ({ history }) => {
         )}
 
         {!loading && (
-          <Flex flexWrap='wrap'>
+          <Flex flexWrap='wrap' align='center'>
             {users.map((user, index) => {
               return (
                 <UserCard

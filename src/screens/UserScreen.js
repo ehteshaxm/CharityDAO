@@ -24,7 +24,7 @@ import user from '../eth/user';
 import web3 from '../eth/web3';
 import Header from '../components/Header';
 
-const OrgScreen = ({ history, match }) => {
+const UserScreen = ({ history, match }) => {
   const [userDetails, setUserDetails] = useState({});
   const [metamaskUser, setMetamaskUser] = useState({});
   const [allCampaigns, setAllCampaigns] = useState([]);
@@ -118,10 +118,10 @@ const OrgScreen = ({ history, match }) => {
           })
       );
       setAllCampaigns(campaigns);
-      setLoading(false);
     } catch (error) {
       console.log(error);
     }
+    setLoading(false);
   }
 
   async function approveUserHandler() {
@@ -431,4 +431,4 @@ const OrgScreen = ({ history, match }) => {
   );
 };
 
-export default OrgScreen;
+export default UserScreen;
