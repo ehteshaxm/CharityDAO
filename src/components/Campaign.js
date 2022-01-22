@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Heading,
@@ -8,11 +8,15 @@ import {
   Button,
   Badge,
   Flex,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import web3 from '../eth/web3';
+import user from '../eth/user';
 
 const Campaign = ({
+  index,
   title,
   description,
   name,
@@ -28,19 +32,37 @@ const Campaign = ({
   transactionComplete,
   metamaskUserIsMember,
   metamaskUserIsUser,
+  metamaskUserAddress,
+  creatorAddress,
+  approveCampaign,
+  rejectCampaign,
+  finalizeTransaction,
 }) => {
+  const [approveButtonLoading, setApproveButtonLoading] = useState(false);
+  const [rejectButtonLoading, setRejectButtonLoading] = useState(false);
+
+  useEffect(() => {}, []);
+
   return (
-    <Box borderWidth='1px' borderRadius='lg' p={4} width='400px'>
+    <Box
+      borderWidth='1px'
+      borderRadius='lg'
+      p={4}
+      mx={2}
+      mb={4}
+      width='400px'
+      bg={transactionComplete && 'cyan.50'}
+    >
       <Heading size='md'>
         {title}{' '}
         <Badge
           borderRadius='full'
           px='2'
           colorScheme={
-            !approved && !rejected ? 'pink' : approved ? 'green' : 'red'
+            !approved && !rejected ? 'blue' : approved ? 'green' : 'red'
           }
         >
-          {!approved && !rejected && 'Not Approved'}
+          {!approved && !rejected && 'Voting'}
           {approved && 'Approved'}
           {rejected && 'Rejected'}
         </Badge>
@@ -94,31 +116,80 @@ const Campaign = ({
               {rejectCount} Rejected
             </Badge>
             <Badge borderRadius='full' px='2' colorScheme='gray'>
-              {totalMembers} Remaining
+              {totalMembers} Members
             </Badge>
           </Box>
         </GridItem>
         <GridItem colSpan={2}>
           <Flex flexDirection='column'>
-            <Button
-              leftIcon={<CheckIcon />}
-              colorScheme='green'
-              variant='solid'
-            >
-              Approve
-            </Button>
-            <Button
-              leftIcon={<CloseIcon />}
-              colorScheme='red'
-              variant='outline'
-              px={6}
-              mt={2}
-            >
-              Reject
-            </Button>
-            <Button colorScheme='red' variant='solid' px={6} mt={2}>
-              Transact
-            </Button>
+            {!approved && !rejected && metamaskUserIsMember && (
+              <Flex flexDirection='column'>
+                <Button
+                  leftIcon={<CheckIcon />}
+                  colorScheme='green'
+                  variant='solid'
+                  isLoading={approveButtonLoading}
+                  loadingText='Processing'
+                  onClick={() =>
+                    approveCampaign(index, setApproveButtonLoading)
+                  }
+                >
+                  Approve
+                </Button>
+                <Button
+                  leftIcon={<CloseIcon />}
+                  colorScheme='red'
+                  variant='outline'
+                  px={6}
+                  mt={2}
+                  isLoading={rejectButtonLoading}
+                  loadingText='Processing'
+                  onClick={() => rejectCampaign(index, setRejectButtonLoading)}
+                >
+                  Reject
+                </Button>
+              </Flex>
+            )}
+            {approved &&
+              metamaskUserAddress !== creatorAddress &&
+              !transactionComplete && (
+                <Alert status='success'>
+                  <AlertIcon />
+                  Campaign Approved
+                </Alert>
+              )}
+            {rejected && (
+              <Alert status='error'>
+                <AlertIcon />
+                Campaign Rejected
+              </Alert>
+            )}
+            {!approved && !rejected && metamaskUserIsUser && (
+              <Alert status='info'>
+                <AlertIcon />
+                Voting in Progress
+              </Alert>
+            )}
+            {approved &&
+              !transactionComplete &&
+              metamaskUserIsUser &&
+              metamaskUserAddress == creatorAddress && (
+                <Button
+                  colorScheme='red'
+                  variant='solid'
+                  px={6}
+                  mt={5}
+                  onClick={() => finalizeTransaction(index)}
+                >
+                  Transact
+                </Button>
+              )}
+            {transactionComplete && (
+              <Alert status='success'>
+                <AlertIcon />
+                Transaction Completed
+              </Alert>
+            )}
           </Flex>
         </GridItem>
       </Grid>

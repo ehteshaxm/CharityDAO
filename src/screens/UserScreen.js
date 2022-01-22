@@ -13,6 +13,8 @@ import {
   Alert,
   AlertIcon,
   AlertTitle,
+  Spinner,
+  Center,
 } from '@chakra-ui/react';
 import { CheckIcon, CloseIcon, AddIcon } from '@chakra-ui/icons';
 import Campaign from '../components/Campaign';
@@ -25,11 +27,16 @@ const OrgScreen = ({ history }) => {
   const [userDetails, setUserDetails] = useState({});
   const [metamaskUser, setMetamaskUser] = useState({});
   const [allCampaigns, setAllCampaigns] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [userApproveButtonLoading, setUserApproveButtonLoading] =
+    useState(false);
+  const [userRejectButtonLoading, setUserRejectButtonLoading] = useState(false);
 
-  const routeUser = '0x86cc6858a4746c3948bb248dcab4737a480c01fc';
-  // const routeUser = '0x9fffD9B4A269f15CA4d1B9EddEA476BFF9C8218E';
+  const routeUser = '0x6200f5Ac82a2CcBA369925F11De05AE26B1E8684';
+  // const routeUser = '0x57D5B1Ff46C5B3E21854459DCcb55A57E2A229A9';
 
   useEffect(() => {
+    setLoading(true);
     fetchUserDetails();
     fetchMetamaskUserDetails();
     fetchCampaigns();
@@ -44,6 +51,7 @@ const OrgScreen = ({ history }) => {
       const userInstance = user(routeUser);
       const name = await userInstance.methods.name().call();
       const description = await userInstance.methods.description().call();
+      const address = await userInstance.methods.locationAddress().call();
       const userAddress = await userInstance.methods.userAddress().call();
       const phone = await userInstance.methods.phone().call();
       const email = await userInstance.methods.email().call();
@@ -57,6 +65,7 @@ const OrgScreen = ({ history }) => {
       setUserDetails({
         name,
         description,
+        address,
         userAddress,
         phone,
         email,
@@ -100,34 +109,85 @@ const OrgScreen = ({ history }) => {
       const userInstance = user(routeUser);
       const numCampaign = await userInstance.methods.numCampaign().call();
       const campaigns = await Promise.all(
-        Array(numCampaign)
+        Array(parseInt(numCampaign))
           .fill()
           .map((element, index) => {
             return userInstance.methods.campaigns(index).call();
           })
       );
       setAllCampaigns(campaigns);
-    } catch (error) {}
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function approveUserHandler() {
     try {
+      setUserApproveButtonLoading(true);
       const userInstance = user(routeUser);
       const accounts = await web3.eth.getAccounts();
       console.log(userInstance);
       await userInstance.methods.approveUser().send({
         from: accounts[0],
       });
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }
+    setUserApproveButtonLoading(false);
   }
 
   async function rejectUserHandler() {
     try {
+      setUserRejectButtonLoading(true);
       const userInstance = user(routeUser);
       const accounts = await web3.eth.getAccounts();
       await userInstance.methods.rejectUser().send({
+        from: accounts[0],
+      });
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+    setUserRejectButtonLoading(false);
+  }
+
+  async function approveCampaignHandler(index, setApproveButtonLoading) {
+    try {
+      setApproveButtonLoading(true);
+      const userInstance = user(routeUser);
+      const accounts = await web3.eth.getAccounts();
+      await userInstance.methods.approveCampaign(index).send({
+        from: accounts[0],
+      });
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+    setApproveButtonLoading(false);
+  }
+
+  async function rejectCampaignHandler(index, setRejectButtonLoading) {
+    try {
+      setRejectButtonLoading(true);
+      const userInstance = user(routeUser);
+      const accounts = await web3.eth.getAccounts();
+      await userInstance.methods.rejectCampaign(index).send({
+        from: accounts[0],
+      });
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+    setRejectButtonLoading(false);
+  }
+
+  async function finalizeTransaction(index) {
+    try {
+      const userInstance = user(routeUser);
+      const accounts = await web3.eth.getAccounts();
+      await userInstance.methods.finalizeTransaction(index).send({
         from: accounts[0],
       });
     } catch (error) {
@@ -137,198 +197,231 @@ const OrgScreen = ({ history }) => {
 
   return (
     <div>
-      <Container maxW='container.xl' mt={7} pb={50}>
-        <Flex justifyContent='space-between' flexWrap='wrap'>
-          <Box padding={10} pt={5}>
-            <Heading>
-              {userDetails.name}{' '}
-              <Badge
-                borderRadius='full'
-                px='2'
-                colorScheme={
-                  !userDetails.approved && !userDetails.rejected
-                    ? 'pink'
-                    : userDetails.approved
-                    ? 'green'
-                    : 'red'
-                }
-              >
+      {loading && (
+        <Center height='500px'>
+          <Spinner
+            thickness='4px'
+            speed='0.65s'
+            emptyColor='gray.200'
+            color='blue.500'
+            size='xl'
+          />
+        </Center>
+      )}
+      {!loading && (
+        <Container maxW='container.xl' mt={7} pb={50}>
+          <Flex justifyContent='space-between' flexWrap='wrap'>
+            <Box pt={5}>
+              <Heading>
+                {userDetails.name}{' '}
+                <Badge
+                  borderRadius='full'
+                  px='2'
+                  colorScheme={
+                    !userDetails.approved && !userDetails.rejected
+                      ? 'pink'
+                      : userDetails.approved
+                      ? 'green'
+                      : 'red'
+                  }
+                >
+                  {!userDetails.approved &&
+                    !userDetails.rejected &&
+                    'Not Approved'}
+                  {userDetails.approved && 'Approved'}
+                  {userDetails.rejected && 'Rejected'}
+                </Badge>
+              </Heading>
+              <Text mb={4}>{userDetails.description}</Text>
+              <Grid templateColumns='repeat(4, 1fr)' gap={6}>
+                <GridItem colSpan={2}>
+                  <Box>
+                    <Heading as='h5' size='md' fontWeight='semibold'>
+                      User Address:
+                    </Heading>
+                    {userDetails.userAddress}
+                  </Box>
+                </GridItem>
+                <GridItem colSpan={2}>
+                  <Box>
+                    <Heading as='h5' size='md' fontWeight='semibold'>
+                      Address:
+                    </Heading>
+                    {userDetails.address}
+                  </Box>
+                </GridItem>
+                <GridItem colSpan={2}>
+                  <Box>
+                    <Heading as='h5' size='md' fontWeight='semibold'>
+                      Contact:
+                    </Heading>
+                    {userDetails.phone}
+                    <Text>{userDetails.email}</Text>
+                  </Box>
+                </GridItem>
+                <GridItem colSpan={2}>
+                  <Box>
+                    <Heading as='h5' size='md' fontWeight='semibold'>
+                      Status:
+                    </Heading>
+                    <Badge
+                      borderRadius='full'
+                      px='2'
+                      colorScheme='green'
+                      mr={1}
+                    >
+                      {userDetails.approveCount} Approved
+                    </Badge>
+                    <Badge borderRadius='full' px='2' colorScheme='red' mr={1}>
+                      {userDetails.rejectCount} Rejected
+                    </Badge>
+                    <Badge borderRadius='full' px='2' colorScheme='gray'>
+                      {userDetails.memberCount} Total Members
+                    </Badge>
+                  </Box>
+                </GridItem>
+              </Grid>
+              <Box mt={10}>
+                {metamaskUser.isMember &&
+                  !userDetails.approved &&
+                  !userDetails.rejected &&
+                  !metamaskUser.approvedUser &&
+                  !metamaskUser.rejectedUser && (
+                    <>
+                      <Button
+                        leftIcon={<CheckIcon />}
+                        colorScheme='green'
+                        variant='solid'
+                        mr={3}
+                        isLoading={userApproveButtonLoading}
+                        loadingText='Processing'
+                        onClick={approveUserHandler}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        leftIcon={<CloseIcon />}
+                        colorScheme='red'
+                        variant='outline'
+                        isLoading={userRejectButtonLoading}
+                        loadingText='Processing'
+                        onClick={rejectUserHandler}
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                {userDetails.rejected && (
+                  <Alert status='error'>
+                    <AlertIcon />
+                    {metamaskUser.isMember
+                      ? 'User was Rejected'
+                      : 'Profile has been Rejected'}
+                  </Alert>
+                )}
+                {userDetails.approved && (
+                  <Alert status='success'>
+                    <AlertIcon />
+                    {metamaskUser.isMember
+                      ? 'User was Approved'
+                      : 'Profile has been Approved'}
+                  </Alert>
+                )}
                 {!userDetails.approved &&
                   !userDetails.rejected &&
-                  'Not Approved'}
-                {userDetails.approved && 'Approved'}
-                {userDetails.rejected && 'Rejected'}
-              </Badge>
-            </Heading>
-            <Text mb={4}>{userDetails.description}</Text>
-            <Grid templateColumns='repeat(4, 1fr)' gap={6}>
-              <GridItem colSpan={2}>
-                <Box>
-                  <Heading as='h5' size='md' fontWeight='semibold'>
-                    User Address:
-                  </Heading>
-                  {userDetails.userAddress}
-                </Box>
-              </GridItem>
-              {/* <GridItem colSpan={2}>
-                <Box>
-                  <Heading as='h5' size='md' fontWeight='semibold'>
-                    Address:
-                  </Heading>
-                  {userDetails.address}
-                </Box>
-              </GridItem> */}
-              <GridItem colSpan={2}>
-                <Box>
-                  <Heading as='h5' size='md' fontWeight='semibold'>
-                    Contact:
-                  </Heading>
-                  {userDetails.phone}
-                  <Text>{userDetails.email}</Text>
-                </Box>
-              </GridItem>
-              <GridItem colSpan={2}>
-                <Box>
-                  <Heading as='h5' size='md' fontWeight='semibold'>
-                    Status:
-                  </Heading>
-                  <Badge borderRadius='full' px='2' colorScheme='green' mr={1}>
-                    {userDetails.approveCount} Approved
-                  </Badge>
-                  <Badge borderRadius='full' px='2' colorScheme='red' mr={1}>
-                    {userDetails.rejectCount} Rejected
-                  </Badge>
-                  <Badge borderRadius='full' px='2' colorScheme='gray'>
-                    {userDetails.memberCount} Total Members
-                  </Badge>
-                </Box>
-              </GridItem>
-            </Grid>
-            <Box mt={10}>
-              {metamaskUser.isMember &&
-                !userDetails.approved &&
-                !userDetails.rejected && (
-                  <>
-                    <Button
-                      leftIcon={<CheckIcon />}
-                      colorScheme='green'
-                      variant='solid'
-                      mr={3}
-                      onClick={approveUserHandler}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      leftIcon={<CloseIcon />}
-                      colorScheme='red'
-                      variant='outline'
-                      onClick={rejectUserHandler}
-                    >
-                      Reject
-                    </Button>
-                  </>
-                )}
-              {userDetails.rejected && (
-                <Alert status='error'>
-                  <AlertIcon />
-                  {metamaskUser.isMember
-                    ? 'User was Rejected'
-                    : 'Profile has been Rejected'}
-                </Alert>
-              )}
-              {userDetails.approved && (
-                <Alert status='success'>
-                  <AlertIcon />
-                  {metamaskUser.isMember
-                    ? 'User was Approved'
-                    : 'Profile has been Approved'}
-                </Alert>
-              )}
-              {!userDetails.approved &&
-                !userDetails.rejected &&
-                metamaskUser.isUser && (
-                  <Alert status='info'>
-                    <AlertIcon />
-                    <AlertTitle mr={2}>Please Wait</AlertTitle>
-                    Voting in Progress
-                  </Alert>
-                )}
-              {!userDetails.approved &&
-                !userDetails.rejected &&
-                metamaskUser.approved && (
-                  <Alert status='info'>
-                    <AlertIcon />
-                    You Approved this User
-                  </Alert>
-                )}
-              {!userDetails.approved &&
-                !userDetails.rejected &&
-                metamaskUser.rejected && (
-                  <Alert status='info'>
-                    <AlertIcon />
-                    You Rejected this User
-                  </Alert>
-                )}
+                  metamaskUser.isUser && (
+                    <Alert status='info'>
+                      <AlertIcon />
+                      <AlertTitle mr={2}>Please Wait</AlertTitle>
+                      Voting in Progress
+                    </Alert>
+                  )}
+                {metamaskUser.approvedUser &&
+                  !userDetails.approved &&
+                  !userDetails.rejected && (
+                    <Alert status='info'>
+                      <AlertIcon />
+                      You Approved this User
+                    </Alert>
+                  )}
+                {metamaskUser.rejectedUser &&
+                  !userDetails.approved &&
+                  !userDetails.rejected && (
+                    <Alert status='info'>
+                      <AlertIcon />
+                      You Rejected this User
+                    </Alert>
+                  )}
+              </Box>
             </Box>
+          </Flex>
+          <Box my={7}>
+            <Flex align='center' justifyContent='space-between'>
+              <Heading as='h5' size='lg'>
+                Campaigns
+              </Heading>
+              {!metamaskUser.isMember && (
+                <Link to='/create'>
+                  <Button
+                    leftIcon={<AddIcon />}
+                    colorScheme='teal'
+                    variant='solid'
+                    disabled={
+                      !userDetails.approved ||
+                      userDetails.userAddress != metamaskUser.address
+                    }
+                    history={history}
+                    userContractAddress={routeUser}
+                  >
+                    Create Campaign
+                  </Button>
+                </Link>
+              )}
+            </Flex>
+            {!userDetails.approved && !userDetails.rejected && (
+              <Alert status='error' mt={4}>
+                <AlertIcon />
+                <AlertTitle mr={2}>
+                  {metamaskUser.isMember ? 'No Campaigns' : 'Not Approved'}
+                </AlertTitle>
+                {metamaskUser.isMember
+                  ? 'User must be approved to be allowed to create campaigns'
+                  : 'Must be approved by the DAO before creating campaigns'}
+              </Alert>
+            )}
           </Box>
-        </Flex>
-        <Box my={7}>
-          <Flex align='center' justifyContent='space-between'>
-            <Heading as='h5' size='lg'>
-              Campaigns
-            </Heading>
-            <Link to='/create'>
-              <Button
-                leftIcon={<AddIcon />}
-                colorScheme='teal'
-                variant='solid'
-                disabled={
-                  !userDetails.approved ||
-                  userDetails.userAddress != metamaskUser.address
-                }
-                history={history}
-                userContractAddress={routeUser}
-              >
-                Create Campaign
-              </Button>
-            </Link>
-          </Flex>
-          {!userDetails.approved && !userDetails.rejected && (
-            <Alert status='error' mt={4}>
-              <AlertIcon />
-              <AlertTitle mr={2}>
-                {metamaskUser.isMember ? 'No Campaigns' : 'Not Approved'}
-              </AlertTitle>
-              {metamaskUser.isMember
-                ? 'User must be approved to be allowed to create campaigns'
-                : 'Must be approved by the DAO before creating campaigns'}
-            </Alert>
+          {userDetails.approved && (
+            <Flex flexWrap='wrap'>
+              {allCampaigns.map((campaign, index) => (
+                <Campaign
+                  key={index}
+                  index={index}
+                  title={campaign.title}
+                  description={campaign.description}
+                  name={campaign.recipientName}
+                  phone={campaign.recipientPhone}
+                  email={campaign.recipientEmail}
+                  recipient={campaign.recipient}
+                  amount={campaign.value}
+                  approved={campaign.isApproved}
+                  rejected={campaign.isRejected}
+                  approveCount={campaign.approveCount}
+                  rejectCount={campaign.rejectCount}
+                  totalMembers={userDetails.memberCount}
+                  transactionComplete={campaign.transactionComplete}
+                  metamaskUserIsMember={metamaskUser.isMember}
+                  metamaskUserIsUser={metamaskUser.isUser}
+                  metamaskUserAddress={metamaskUser.address}
+                  creatorAddress={userDetails.userAddress}
+                  approveCampaign={approveCampaignHandler}
+                  rejectCampaign={rejectCampaignHandler}
+                  finalizeTransaction={finalizeTransaction}
+                />
+              ))}
+            </Flex>
           )}
-        </Box>
-        {userDetails.approved && (
-          <Flex justifyContent='space-between' flexWrap='wrap'>
-            {allCampaigns.map((campaign) => (
-              <Campaign
-                title={campaign.title}
-                description={campaign.description}
-                name={campaign.recipientName}
-                phone={campaign.recipientPhone}
-                email={campaign.recipientEmail}
-                recipient={campaign.recipient}
-                amount={campaign.value}
-                approved={campaign.isApproved}
-                rejected={campaign.isRejected}
-                approveCount={campaign.approveCount}
-                rejectCount={campaign.rejectCount}
-                totalMembers={userDetails.memberCount}
-                transactionComplete={campaign.transactionComplete}
-                metamaskUserIsMember={metamaskUser.isMember}
-                metamaskUserIsUser={metamaskUser.isUser}
-              />
-            ))}
-          </Flex>
-        )}
-      </Container>
+        </Container>
+      )}
     </div>
   );
 };

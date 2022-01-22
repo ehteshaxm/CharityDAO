@@ -48,7 +48,7 @@ const CampaignCreate = ({ history, userContractAddress }) => {
     console.log(typeof amount);
     try {
       const accounts = await web3.eth.getAccounts();
-      const userInstance = user('0x86cc6858a4746c3948bb248dcab4737a480c01fc');
+      const userInstance = user('0x6200f5Ac82a2CcBA369925F11De05AE26B1E8684');
       console.log(userInstance);
       await userInstance.methods
         .createCampaign(

@@ -24,10 +24,10 @@ contract DAO {
         members[msg.sender] = true;
     }
 
-    function createUser(string memory name, string memory description, string memory phone, string memory email) public {
+    function createUser(string memory name, string memory description, string memory locationAddress, string memory phone, string memory email) public {
         require(!members[msg.sender]);
         require(!users[msg.sender]);
-        User newUser = new User(name, description, phone, email, msg.sender, DAOAddress);
+        User newUser = new User(name, description, locationAddress, phone, email, msg.sender, DAOAddress);
         users[msg.sender] = true;
         allUsers.push(newUser);
     }
@@ -38,6 +38,10 @@ contract DAO {
 
     function getPoolAmount() public view returns(uint) {
         return address(this).balance;
+    }
+
+    function addToPool() public payable {
+        require(msg.value > 0);
     }
 
     function transact(address payable recipient, uint value) public {
@@ -69,6 +73,7 @@ contract User {
     address public userAddress;
     string public phone;
     string public email;
+    string public locationAddress;
     uint public approveCount;
     uint public rejectCount;
     bool public isApproved;
@@ -99,13 +104,14 @@ contract User {
     uint public numCampaign;
     mapping(uint => Campaign) public campaigns;
 
-    constructor(string memory _name, string memory _description, string memory _phone, string memory _email, address _creator, address _DAOAddress) {
+    constructor(string memory _name, string memory _description, string memory _locationAddress, string memory _phone, string memory _email, address _creator, address _DAOAddress) {
         name = _name;
         description = _description;
         phone = _phone;
         email = _email;
         userAddress = _creator;
         DAOAddress = _DAOAddress;
+        locationAddress = _locationAddress;
         approveCount = 0;
         rejectCount = 0;
         isApproved = false;
@@ -196,6 +202,26 @@ contract User {
         if(campaigns[campaignIndex].rejectCount > (instance.getMemberCount()/2)) {
             campaigns[campaignIndex].isRejected = true;
         }
+    }
+
+    function getMemberApprovalStatus(uint campaignIndex) public view returns(bool){
+        DAO instance = DAO(DAOAddress);
+        require(instance.isAMember(msg.sender));
+        require(!instance.isAUser(msg.sender));
+        if(campaigns[campaignIndex].campaignApprovedMembers[msg.sender]){
+            return true;
+        }
+        return false;
+    }
+
+    function getMemberRejectionStatus(uint campaignIndex) public view returns(bool){
+        DAO instance = DAO(DAOAddress);
+        require(instance.isAMember(msg.sender));
+        require(!instance.isAUser(msg.sender));
+        if(campaigns[campaignIndex].campaignRejectedMembers[msg.sender]){
+            return true;
+        }
+        return false;
     }
 
     function finalizeTransaction(uint campaignIndex) public {

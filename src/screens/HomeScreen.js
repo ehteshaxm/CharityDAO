@@ -5,12 +5,14 @@ import dao from '../eth/dao';
 import user from '../eth/user';
 
 const HomeScreen = ({ history }) => {
+  const [userContracts, setUserContracts] = useState([]);
+  const [userAddresses, setUserAddresses] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     setLoading(true);
-
+    fetchUserAddresses();
     fetchUsers();
     window.ethereum.on('accountsChanged', function (accounts) {
       history.push('/');
@@ -18,11 +20,10 @@ const HomeScreen = ({ history }) => {
     });
   }, []);
 
-  async function fetchUsers() {
-    const userData = [];
+  async function fetchUserAddresses() {
     try {
       const userAddressArray = await dao.methods.getAllUsers().call();
-      console.log(userAddressArray);
+      setUserAddresses(userAddressArray);
       const userContractInstances = await Promise.all(
         Array(userAddressArray.length)
           .fill()
@@ -30,9 +31,21 @@ const HomeScreen = ({ history }) => {
             return user(userAddressArray[index]);
           })
       );
-      userContractInstances.forEach(async (instance, index) => {
+      console.log(userContractInstances);
+      setUserContracts(userContractInstances);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchUsers() {
+    try {
+      const userData = [];
+      console.log(userContracts);
+      userContracts.forEach(async (instance, index) => {
         const name = await instance.methods.name().call();
         const description = await instance.methods.description().call();
+        const creatorAddress = await instance.methods.userAddress().call();
         const isApproved = await instance.methods.isApproved().call();
         const isRejected = await instance.methods.isRejected().call();
         userData.push({
@@ -40,14 +53,13 @@ const HomeScreen = ({ history }) => {
           description: description,
           isApproved: isApproved,
           isRejected: isRejected,
-          routeTo: userAddressArray[index],
+          routeTo: creatorAddress,
+          userAddress: userAddresses[index],
         });
       });
     } catch (error) {
       console.log(error);
     }
-    setUsers(userData);
-    setLoading(false);
   }
 
   return (

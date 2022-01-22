@@ -23,6 +23,7 @@ const StartScreen = ({ history }) => {
   //Form States for User
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
@@ -58,9 +59,11 @@ const StartScreen = ({ history }) => {
     setButtonLoading(true);
     try {
       const accounts = await web3.eth.getAccounts();
-      await dao.methods.createUser(name, description, phone, email).send({
-        from: accounts[0],
-      });
+      await dao.methods
+        .createUser(name, description, address, phone, email)
+        .send({
+          from: accounts[0],
+        });
     } catch (error) {
       console.log(error);
     }
@@ -80,7 +83,7 @@ const StartScreen = ({ history }) => {
       console.log(error);
     }
     setButtonLoading(false);
-    history.push('/');
+    history.push('/home');
   }
 
   if (!startUser && !startMember) {
@@ -186,6 +189,16 @@ const StartScreen = ({ history }) => {
               name='description'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+            />
+          </FormControl>
+          <FormControl mt={5}>
+            <FormLabel htmlFor='phone'>Address</FormLabel>
+            <Input
+              id='address'
+              type='text'
+              name='address'
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
           </FormControl>
           <FormControl mt={5}>
