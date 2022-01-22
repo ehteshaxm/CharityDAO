@@ -185,21 +185,24 @@ const UserScreen = ({ history, match }) => {
     setRejectButtonLoading(false);
   }
 
-  async function finalizeTransaction(index) {
+  async function finalizeTransaction(index, setTransactButtonLoading) {
+    setTransactButtonLoading(true);
     try {
       const userInstance = user(routeUser);
       const accounts = await web3.eth.getAccounts();
       await userInstance.methods.finalizeTransaction(index).send({
         from: accounts[0],
       });
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }
+    setTransactButtonLoading(false);
   }
 
   return (
     <div>
-      <Header />
+      <Header id={match.params.id} />
       {loading && (
         <Center height='500px'>
           <Spinner

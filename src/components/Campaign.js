@@ -39,6 +39,7 @@ const Campaign = ({
 }) => {
   const [approveButtonLoading, setApproveButtonLoading] = useState(false);
   const [rejectButtonLoading, setRejectButtonLoading] = useState(false);
+  const [transactButtonLoading, setTransactButtonLoading] = useState(false);
 
   return (
     <Box
@@ -176,7 +177,11 @@ const Campaign = ({
                   variant='solid'
                   px={6}
                   mt={5}
-                  onClick={() => finalizeTransaction(index)}
+                  isLoading={transactButtonLoading}
+                  loadingText='Processing'
+                  onClick={() =>
+                    finalizeTransaction(index, setTransactButtonLoading)
+                  }
                 >
                   Transact
                 </Button>

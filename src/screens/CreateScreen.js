@@ -73,7 +73,7 @@ const CampaignCreate = ({ history, location }) => {
 
   return (
     <>
-      <Header />
+      <Header history={history} />
       <Container maxW='container.xl' mt={7}>
         <Heading size='md'>Create Campaign</Heading>
         <Center p={50}>

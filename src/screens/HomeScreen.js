@@ -68,7 +68,7 @@ const HomeScreen = ({ history }) => {
 
   return (
     <>
-      <Header />
+      <Header history={history} />
       <Container mt={7} maxW='container.xl'>
         <Heading as='h3' size='md' mb={7}>
           Users:

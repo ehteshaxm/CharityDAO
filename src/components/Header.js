@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import dao from '../eth/dao';
 import web3 from '../eth/web3';
 
-const Header = (props) => {
+const Header = ({ id }) => {
   const [amount, setAmount] = useState('');
   const [metamaskUser, setMetamaskUser] = useState({});
   const [poolAmount, setPoolAmount] = useState('');
@@ -95,8 +95,7 @@ const Header = (props) => {
               </Heading>
             </Link>
           </Flex>
-
-          {metamaskUser.isUser && (
+          {metamaskUser.isUser && !id && (
             <Link to={`/user/${routeTo}`}>
               <Button colorScheme='teal'>Profile</Button>
             </Link>
